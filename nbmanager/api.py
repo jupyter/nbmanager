@@ -35,10 +35,7 @@ class NbServer:
         return r.json()
 
     def shutdown(self, wait=True):
-        os.kill(self.pid, signal.SIGINT)
-        # The first interrupt makes it display an 'are you sure?' prompt
-        time.sleep(0.01)
-        os.kill(self.pid, signal.SIGINT)
+        os.kill(self.pid, signal.SIGTERM)
         
         if wait:
             while check_pid(self.pid):
