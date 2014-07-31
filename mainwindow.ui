@@ -17,6 +17,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTreeView" name="treeView">
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>
@@ -39,6 +45,9 @@
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -49,6 +58,10 @@
    <addaction name="actionRefresh"/>
   </widget>
   <action name="actionShutdown">
+   <property name="icon">
+    <iconset resource="qtresources.qrc">
+     <normaloff>:/icons/icons/stop.png</normaloff>:/icons/icons/stop.png</iconset>
+   </property>
    <property name="text">
     <string>Shutdown</string>
    </property>
@@ -57,6 +70,10 @@
    </property>
   </action>
   <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="qtresources.qrc">
+     <normaloff>:/icons/icons/reload.png</normaloff>:/icons/icons/reload.png</iconset>
+   </property>
    <property name="text">
     <string>Refresh</string>
    </property>
@@ -65,6 +82,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="qtresources.qrc"/>
+ </resources>
  <connections/>
 </ui>

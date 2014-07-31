@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>icons/ipynb_icon_16x16.png</file>
+    <file>icons/home.png</file>
+    <file>icons/reload.png</file>
+    <file>icons/stop.png</file>
+  </qresource>
+</RCC>

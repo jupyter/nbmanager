@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Wed Jul 30 19:20:54 2014
+# Created: Wed Jul 30 20:28:22 2014
 #      by: PyQt4 UI code generator 4.11.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,7 @@ class Ui_MainWindow(object):
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.treeView = QtGui.QTreeView(self.centralwidget)
+        self.treeView.setIconSize(QtCore.QSize(16, 16))
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.treeView.header().setVisible(False)
         self.verticalLayout.addWidget(self.treeView)
@@ -44,11 +45,18 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         MainWindow.setStatusBar(self.statusbar)
         self.toolBar = QtGui.QToolBar(MainWindow)
+        self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.actionShutdown = QtGui.QAction(MainWindow)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionShutdown.setIcon(icon)
         self.actionShutdown.setObjectName(_fromUtf8("actionShutdown"))
         self.actionRefresh = QtGui.QAction(MainWindow)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/reload.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRefresh.setIcon(icon1)
         self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
         self.toolBar.addAction(self.actionShutdown)
         self.toolBar.addAction(self.actionRefresh)
@@ -64,3 +72,4 @@ class Ui_MainWindow(object):
         self.actionRefresh.setText(_translate("MainWindow", "Refresh", None))
         self.actionRefresh.setToolTip(_translate("MainWindow", "Refresh the list of processes", None))
 
+from . import qtresources_rc

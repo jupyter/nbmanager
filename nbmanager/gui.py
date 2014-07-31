@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
@@ -21,7 +21,23 @@ class SessionItem(QtGui.QStandardItem):
 
 class Main(QtGui.QMainWindow):
     selected_proc = None
-    
+
+    _nb_icon = None
+    @property
+    def nb_icon(self):
+        if self._nb_icon is None:
+            self._nb_icon = QtGui.QIcon()
+            self._nb_icon.addPixmap(QtGui.QPixmap(":/icons/icons/ipynb_icon_16x16.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        return self._nb_icon
+
+    _server_icon = None
+    @property
+    def server_icon(self):
+        if self._server_icon is None:
+            self._server_icon = QtGui.QIcon()
+            self._server_icon.addPixmap(QtGui.QPixmap(":/icons/icons/home.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        return self._server_icon
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -41,10 +57,13 @@ class Main(QtGui.QMainWindow):
     def populate_processes(self):
         for server in api.NbServer.findall():
             server_item = ServerItem(server)
+            server_item.setIcon(self.server_icon)
             self.processes_root.appendRow(server_item)
-            
+
             for session in server.sessions():
-                server_item.appendRow(SessionItem(session, server))
+                session_item = SessionItem(session, server)
+                session_item.setIcon(self.nb_icon)
+                server_item.appendRow(session_item)
     
     def refresh_processes(self):
         self.processes_model = QtGui.QStandardItemModel()
