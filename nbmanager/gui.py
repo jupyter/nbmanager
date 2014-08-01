@@ -1,6 +1,6 @@
 import sys
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
@@ -42,46 +42,76 @@ class Main(QtGui.QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
+
+        self.servers_by_pid = {}
+        self.sessions_by_sid = {}
+
         self.processes_model = QtGui.QStandardItemModel()
+        self.ui.treeView.setModel(self.processes_model)
         self.processes_root = self.processes_model.invisibleRootItem()
         self.populate_processes()
-        self.ui.treeView.setModel(self.processes_model)
-        self.ui.treeView.expandAll()
-        
+
         self.ui.treeView.clicked.connect(self.select_process)
-        
+
         self.ui.actionShutdown.triggered.connect(self.shutdown)
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
-    
-    def populate_processes(self):
-        for server in api.NbServer.findall():
-            server_item = ServerItem(server)
-            server_item.setIcon(self.server_icon)
-            self.processes_root.appendRow(server_item)
 
-            for session in server.sessions():
-                session_item = SessionItem(session, server)
-                session_item.setIcon(self.nb_icon)
-                server_item.appendRow(session_item)
-    
+    def add_server(self, server):
+        server_item = ServerItem(server)
+        server_item.setIcon(self.server_icon)
+        self.servers_by_pid[server.pid] = server_item
+        self.processes_root.appendRow(server_item)
+
+        for session in server.sessions():
+            self.add_session(session, server_item)
+
+        self.ui.treeView.expand(server_item.index())
+
+    def add_session(self, session, parent):
+        session_item = SessionItem(session, parent.server)
+        session_item.setIcon(self.nb_icon)
+        self.sessions_by_sid[session['id']] = session_item
+        parent.appendRow(session_item)
+
+    def populate_processes(self):
+        self.current_servers = api.NbServer.findall()
+        for server in self.current_servers:
+            self.add_server(server)
+
     def refresh_processes(self):
-        self.processes_model = QtGui.QStandardItemModel()
-        self.processes_root = self.processes_model.invisibleRootItem()
-        self.populate_processes()
-        self.ui.treeView.setModel(self.processes_model)
-        self.ui.treeView.expandAll()
+        stopped, started, kept = api.NbServer.find_new_and_stopped(self.current_servers)
+        self.current_servers = kept + started
+        for server in stopped:
+            row = self.servers_by_pid.pop(server.pid).row()
+            self.processes_root.removeRow(row)
+            for session in server.last_sessions:
+                self.sessions_by_sid.pop(session['id'])
+
+        for server in started:
+            self.add_server(server)
+
+        for server in kept:
+            closed, opened, kept_sessions = server.sessions_new_and_stopped()
+            parent = self.servers_by_pid[server.pid]
+            for sess in closed:
+                sid = sess['id']
+                row = self.sessions_by_sid.pop(sid).row()
+                parent.removeRow(row)
+
+            for sess in opened:
+                self.add_session(sess, parent)
+
 
     def select_process(self, index):
         self.selected_proc = self.processes_model.itemFromIndex(index)
-    
+
     def shutdown(self):
         if isinstance(self.selected_proc, ServerItem):
             self.selected_proc.server.shutdown(wait=True)
         elif isinstance(self.selected_proc, SessionItem):
             sid = self.selected_proc.session['id']
             self.selected_proc.server.stop_session(sid)
-        
+
         self.refresh_processes()
 
 def main():
