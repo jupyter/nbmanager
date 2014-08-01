@@ -44,9 +44,13 @@ class NbServer:
             return False
 
     def sessions(self):
-        r = requests.get(urljoin(self.url, 'api/sessions'))
-        r.raise_for_status()
-        self.last_sessions = r.json()
+        try:
+            r = requests.get(urljoin(self.url, 'api/sessions'))
+        except requests.ConnectionError:
+            self.last_sessions = []
+        else:
+            r.raise_for_status()
+            self.last_sessions = r.json()
         return self.last_sessions
 
     def sessions_new_and_stopped(self):
@@ -66,8 +70,13 @@ class NbServer:
         os.kill(self.pid, signal.SIGTERM)
 
         if wait:
-            while check_pid(self.pid):
-                time.sleep(0.01)
+            self.wait()
+    
+    def wait(self, interval=0.01):
+        # os.waitpid() only works with child processes, so we need a busy loop
+        pid = self.pid
+        while check_pid(pid):
+            time.sleep(0.01)
 
     def stop_session(self, sid):
         r = requests.delete(urljoin(self.url, 'api/sessions/%s' % sid))

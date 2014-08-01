@@ -1,6 +1,7 @@
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
+QtCore.Signal = QtCore.pyqtSignal
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
@@ -18,6 +19,20 @@ class SessionItem(QtGui.QStandardItem):
         else:
             self.path = session['notebook']['name']
         super().__init__(self.path)
+
+class ServerWaiterThread(QtCore.QThread):
+    registry = set()  # Keep a global reference so threads aren't GCed too soon
+
+    finished = QtCore.Signal()
+    def __init__(self, server, parent=None):
+        super().__init__(parent)
+        self.server = server
+        self.registry.add(self)
+        self.finished.connect(lambda: self.registry.remove(self))
+
+    def run(self):
+        self.server.wait()
+        self.finished.emit()
 
 class Main(QtGui.QMainWindow):
     selected_proc = None
@@ -107,12 +122,15 @@ class Main(QtGui.QMainWindow):
 
     def shutdown(self):
         if isinstance(self.selected_proc, ServerItem):
-            self.selected_proc.server.shutdown(wait=True)
+            server = self.selected_proc.server
+            server.shutdown(wait=False)
+            swt = ServerWaiterThread(server)
+            swt.finished.connect(self.refresh_processes)
+            swt.start()
         elif isinstance(self.selected_proc, SessionItem):
             sid = self.selected_proc.session['id']
             self.selected_proc.server.stop_session(sid)
-
-        self.refresh_processes()
+            self.refresh_processes()
 
 def main():
     app = QtGui.QApplication(sys.argv)
