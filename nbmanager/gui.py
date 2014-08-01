@@ -63,6 +63,9 @@ class Main(QtGui.QMainWindow):
         self.ui.treeView.setModel(self.processes_model)
         self.processes_root = self.processes_model.invisibleRootItem()
         self.populate_processes()
+        self.autorefresh = QtCore.QTimer(self)
+        self.autorefresh.timeout.connect(self.refresh_processes)
+        self.autorefresh.start(1000)
 
         self.ui.actionShutdown.triggered.connect(self.shutdown)
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
