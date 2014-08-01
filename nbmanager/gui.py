@@ -35,8 +35,6 @@ class ServerWaiterThread(QtCore.QThread):
         self.finished.emit()
 
 class Main(QtGui.QMainWindow):
-    selected_proc = None
-
     _nb_icon = None
     @property
     def nb_icon(self):
@@ -65,8 +63,6 @@ class Main(QtGui.QMainWindow):
         self.ui.treeView.setModel(self.processes_model)
         self.processes_root = self.processes_model.invisibleRootItem()
         self.populate_processes()
-
-        self.ui.treeView.clicked.connect(self.select_process)
 
         self.ui.actionShutdown.triggered.connect(self.shutdown)
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
@@ -116,20 +112,23 @@ class Main(QtGui.QMainWindow):
             for sess in opened:
                 self.add_session(sess, parent)
 
-
-    def select_process(self, index):
-        self.selected_proc = self.processes_model.itemFromIndex(index)
+    def selected_process(self):
+        idxs = self.ui.treeView.selectedIndexes()
+        if idxs:
+            return self.processes_model.itemFromIndex(idxs[0])
+        return None
 
     def shutdown(self):
-        if isinstance(self.selected_proc, ServerItem):
-            server = self.selected_proc.server
+        selected_proc = self.selected_process()
+        if isinstance(selected_proc, ServerItem):
+            server = selected_proc.server
             server.shutdown(wait=False)
             swt = ServerWaiterThread(server)
             swt.finished.connect(self.refresh_processes)
             swt.start()
-        elif isinstance(self.selected_proc, SessionItem):
-            sid = self.selected_proc.session['id']
-            self.selected_proc.server.stop_session(sid)
+        elif isinstance(selected_proc, SessionItem):
+            sid = selected_proc.session['id']
+            selected_proc.server.stop_session(sid)
             self.refresh_processes()
 
 def main():
