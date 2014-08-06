@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=IPython Nbmanager
+Icon=ipython-nbmanager
+Exec=python3 -m nbmanager
+Terminal=false
