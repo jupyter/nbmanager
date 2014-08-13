@@ -12,13 +12,18 @@ class ServerItem(QtGui.QStandardItem):
 
 class SessionItem(QtGui.QStandardItem):
     def __init__(self, session, server):
+        super().__init__()
         self.session = session
         self.server = server
-        if session['notebook']['path']:
-            self.path = session['notebook']['path'] + "/" + session['notebook']['name']
-        else:
-            self.path = session['notebook']['name']
-        super().__init__(self.path)
+
+    def data(self, role=QtCore.Qt.UserRole+1):
+        if role == QtCore.Qt.DisplayRole:
+            directory  = self.session['notebook']['path']
+            if directory:
+                return directory + "/" + self.session['notebook']['name']
+            else:
+                return self.session['notebook']['name']
+        return super().data(role)
 
 class ServerWaiterThread(QtCore.QThread):
     registry = set()  # Keep a global reference so threads aren't GCed too soon
@@ -114,6 +119,14 @@ class Main(QtGui.QMainWindow):
 
             for sess in opened:
                 self.add_session(sess, parent)
+
+            for sess in kept_sessions:
+                # If the notebook has been renamed since the last poll, update
+                # its GUI entry
+                sess_item = self.sessions_by_sid[sess['id']]
+                if sess_item.session != sess:
+                    sess_item.session = sess
+                    sess_item.emitDataChanged()
 
     def selected_process(self):
         idxs = self.ui.treeView.selectedIndexes()
