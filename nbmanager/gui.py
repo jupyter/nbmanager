@@ -1,3 +1,4 @@
+import os.path
 import sys
 
 from PyQt4 import QtCore, QtGui
@@ -55,6 +56,8 @@ class Main(QtGui.QMainWindow):
             self._server_icon = QtGui.QIcon()
             self._server_icon.addPixmap(QtGui.QPixmap(":/icons/icons/home.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         return self._server_icon
+    
+    _path_valid = True
 
     def __init__(self):
         super().__init__()
@@ -74,6 +77,13 @@ class Main(QtGui.QMainWindow):
 
         self.ui.actionShutdown.triggered.connect(self.shutdown)
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
+        
+        # Launching UI
+        self.ui.start_dir_lineedit.setText(os.path.expanduser('~'))
+        self.ui.start_dir_lineedit.editingFinished.connect(self.validate_dir)
+        self.ui.start_dir_lineedit.textEdited.connect(self.validate_dir_sticky)
+        self.ui.choose_dir_button.clicked.connect(self.choose_dir)
+        self.ui.launch_button.clicked.connect(self.launch)
 
     def add_server(self, server):
         server_item = ServerItem(server)
@@ -146,6 +156,37 @@ class Main(QtGui.QMainWindow):
             sid = selected_proc.session['id']
             selected_proc.server.stop_session(sid)
             self.refresh_processes()
+
+    # Launching UI
+    def choose_dir(self):
+        path = self.ui.start_dir_lineedit.text()
+        if not os.path.isdir(path):
+            path = os.path.expanduser('~')
+        path = QtGui.QFileDialog.getExistingDirectory(self,
+                      "Choose directory for new notebook server",
+                      path, QtGui.QFileDialog.ShowDirsOnly)
+        # Cancelled dialog -> empty string
+        if path:
+            self.ui.start_dir_lineedit.setText(path)
+
+    def validate_dir(self, path=None):
+        if path is None:
+            path = self.ui.start_dir_lineedit.text()
+        isvalid = os.path.isdir(path)
+        self._path_valid = isvalid
+        style = "" if isvalid else "QLineEdit{background: red;}"
+        self.ui.start_dir_lineedit.setStyleSheet(style)
+        self.ui.launch_button.setEnabled(isvalid)
+
+    def validate_dir_sticky(self, path):
+        if self._path_valid:
+            # Don't mark it as invalid until the user finishes editing
+            return
+        self.validate_dir(path)
+    
+    def launch(self):
+        path = self.ui.start_dir_lineedit.text()
+        api.launch_server(path)
 
 def main():
     app = QtGui.QApplication(sys.argv)

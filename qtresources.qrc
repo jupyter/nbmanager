@@ -4,5 +4,6 @@
     <file>icons/home.png</file>
     <file>icons/reload.png</file>
     <file>icons/stop.png</file>
+    <file>icons/right.png</file>
   </qresource>
 </RCC>

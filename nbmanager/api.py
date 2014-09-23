@@ -1,5 +1,6 @@
 import os
 import signal
+import sys
 import time
 from urllib.parse import urljoin
 
@@ -81,3 +82,7 @@ class NbServer:
     def stop_session(self, sid):
         r = requests.delete(urljoin(self.url, 'api/sessions/%s' % sid))
         r.raise_for_status()
+
+def launch_server(directory, **kwargs):
+    import subprocess
+    subprocess.Popen([sys.executable, '-m', 'IPython.html', directory, '--no-browser'])

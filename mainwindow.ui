@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>382</width>
-    <height>468</height>
+    <height>488</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,40 @@
       </attribute>
      </widget>
     </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Launch a server</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLineEdit" name="start_dir_lineedit"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="choose_dir_button">
+           <property name="text">
+            <string>Choose directory</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="launch_button">
+           <property name="text">
+            <string>Launch</string>
+           </property>
+           <property name="icon">
+            <iconset resource="qtresources.qrc">
+             <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -36,7 +70,7 @@
      <x>0</x>
      <y>0</y>
      <width>382</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
