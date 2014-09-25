@@ -13,6 +13,10 @@ if sys.platform == 'darwin':
         setup_requires=['py2app']
     )
 
+else:
+    extra_options = {}
+
+
 setup(name='nbmanager',
       version='0.1',
       description="View and stop running IPython notebooks and servers",
