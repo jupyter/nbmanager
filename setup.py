@@ -1,4 +1,16 @@
-from distutils.core import setup
+from setuptools import setup
+import sys
+
+if sys.platform == 'darwin':
+    extra_options = dict(
+        app=['nbmanager.py'],
+        options={'py2app': {
+            'argv_emulation': True,
+            'packages': ['nbmanager'],
+            'alias': True
+        }},
+        setup_requires=['py2app']
+    )
 
 setup(name='nbmanager',
       version='0.1',
@@ -11,5 +23,5 @@ setup(name='nbmanager',
           "Framework :: IPython",
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python :: 3",
-         ],
-     )
+      ],
+      **extra_options)
