@@ -7,7 +7,8 @@ if sys.platform == 'darwin':
         options={'py2app': {
             'argv_emulation': True,
             'packages': ['nbmanager'],
-            'alias': True
+            'alias': True,
+            'iconfile': 'nbmanager.icns'
         }},
         setup_requires=['py2app']
     )

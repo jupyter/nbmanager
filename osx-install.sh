@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+iconutil -c icns nbmanager.iconset
+
 python3 setup.py install
 python3 setup.py py2app
 
