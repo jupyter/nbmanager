@@ -19,11 +19,7 @@ class SessionItem(QtGui.QStandardItem):
 
     def data(self, role=QtCore.Qt.UserRole+1):
         if role == QtCore.Qt.DisplayRole:
-            directory  = self.session['notebook']['path']
-            if directory:
-                return directory + "/" + self.session['notebook']['name']
-            else:
-                return self.session['notebook']['name']
+            return self.session['notebook']['path']
         return super().data(role)
 
 class ServerWaiterThread(QtCore.QThread):
