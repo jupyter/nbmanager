@@ -19,14 +19,14 @@ class NbServer:
         self.last_sessions = []
 
     @classmethod
-    def findall(cls, profile='default'):
-        return [cls(info) for info in list_running_servers(profile=profile)]
+    def findall(cls):
+        return [cls(info) for info in list_running_servers()]
 
     @classmethod
-    def find_new_and_stopped(cls, last_servers, profile='default'):
+    def find_new_and_stopped(cls, last_servers):
         last_by_pid = {s.pid: s for s in last_servers}
         new_servers, kept_servers = [], []
-        for server in cls.findall(profile=profile):
+        for server in cls.findall():
             if server.pid in last_by_pid:
                 kept_servers.append(last_by_pid.pop(server.pid))
             else:
