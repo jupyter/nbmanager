@@ -44,6 +44,9 @@
            <property name="text">
             <string>Choose directory</string>
            </property>
+           <property name="icon">
+            <iconset theme="document-open-folder"/>
+           </property>
           </widget>
          </item>
          <item>
@@ -52,7 +55,7 @@
             <string>Launch</string>
            </property>
            <property name="icon">
-            <iconset resource="qtresources.qrc">
+            <iconset theme="system-run" resource="qtresources.qrc">
              <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
            </property>
           </widget>
@@ -70,7 +73,7 @@
      <x>0</x>
      <y>0</y>
      <width>382</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
@@ -93,7 +96,7 @@
   </widget>
   <action name="actionShutdown">
    <property name="icon">
-    <iconset resource="qtresources.qrc">
+    <iconset theme="process-stop" resource="qtresources.qrc">
      <normaloff>:/icons/icons/stop.png</normaloff>:/icons/icons/stop.png</iconset>
    </property>
    <property name="text">
@@ -105,7 +108,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset resource="qtresources.qrc">
+    <iconset theme="view-refresh" resource="qtresources.qrc">
      <normaloff>:/icons/icons/reload.png</normaloff>:/icons/icons/reload.png</iconset>
    </property>
    <property name="text">
