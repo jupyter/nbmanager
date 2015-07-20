@@ -41,18 +41,14 @@ class Main(QtWidgets.QMainWindow):
     @property
     def nb_icon(self):
         if self._nb_icon is None:
-            fallback = QtGui.QIcon()
-            fallback.addPixmap(QtGui.QPixmap(":/icons/icons/ipynb_icon_16x16.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            self._nb_icon = QtGui.QIcon.fromTheme('ipython-nbmanager', fallback)
+            self._nb_icon = QtGui.QIcon.fromTheme('x-ipynb+json', QtGui.QIcon(':/icons/icons/ipynb_icon_16x16.png'))
         return self._nb_icon
 
     _server_icon = None
     @property
     def server_icon(self):
         if self._server_icon is None:
-            fallback = QtGui.QIcon()
-            fallback.addPixmap(QtGui.QPixmap(":/icons/icons/home.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            self._server_icon = QtGui.QIcon.fromTheme('go-home', fallback)
+            self._server_icon = QtGui.QIcon.fromTheme('go-home')
         return self._server_icon
     
     _path_valid = True

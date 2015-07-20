@@ -55,8 +55,7 @@
             <string>Launch</string>
            </property>
            <property name="icon">
-            <iconset theme="system-run" resource="qtresources.qrc">
-             <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
+            <iconset theme="system-run"/>
            </property>
           </widget>
          </item>
@@ -96,8 +95,7 @@
   </widget>
   <action name="actionShutdown">
    <property name="icon">
-    <iconset theme="process-stop" resource="qtresources.qrc">
-     <normaloff>:/icons/icons/stop.png</normaloff>:/icons/icons/stop.png</iconset>
+    <iconset theme="process-stop"/>
    </property>
    <property name="text">
     <string>Shutdown</string>
@@ -108,8 +106,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset theme="view-refresh" resource="qtresources.qrc">
-     <normaloff>:/icons/icons/reload.png</normaloff>:/icons/icons/reload.png</iconset>
+    <iconset theme="view-refresh"/>
    </property>
    <property name="text">
     <string>Refresh</string>
