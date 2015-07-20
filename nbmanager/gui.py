@@ -1,7 +1,7 @@
 import os.path
 import sys
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 QtCore.Signal = QtCore.pyqtSignal
 from .ui_mainwindow import Ui_MainWindow
 from . import api
@@ -36,7 +36,7 @@ class ServerWaiterThread(QtCore.QThread):
         self.server.wait()
         self.finished.emit()
 
-class Main(QtGui.QMainWindow):
+class Main(QtWidgets.QMainWindow):
     _nb_icon = None
     @property
     def nb_icon(self):
@@ -158,9 +158,9 @@ class Main(QtGui.QMainWindow):
         path = self.ui.start_dir_lineedit.text()
         if not os.path.isdir(path):
             path = os.path.expanduser('~')
-        path = QtGui.QFileDialog.getExistingDirectory(self,
+        path = QtWidgets.QFileDialog.getExistingDirectory(self,
                       "Choose directory for new notebook server",
-                      path, QtGui.QFileDialog.ShowDirsOnly)
+                      path, QtWidgets.QFileDialog.ShowDirsOnly)
         # Cancelled dialog -> empty string
         if path:
             self.ui.start_dir_lineedit.setText(path)
@@ -185,7 +185,7 @@ class Main(QtGui.QMainWindow):
         api.launch_server(path)
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     window = Main()
     if sys.stderr is None:
         sys.excepthook = window.excepthook
