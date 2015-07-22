@@ -59,6 +59,7 @@ class Main(QtWidgets.QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowIcon(self.nb_icon)
 
         self.servers_by_pid = {}
         self.sessions_by_sid = {}
