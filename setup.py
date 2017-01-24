@@ -29,4 +29,9 @@ setup(name='nbmanager',
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python :: 3",
       ],
+      install_requires=[
+          'notebook',
+          'requests',
+          'PyQt5',
+      ],
       **extra_options)

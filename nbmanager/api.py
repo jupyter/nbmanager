@@ -1,15 +1,19 @@
+import json
 import os
 import signal
 import sys
 import time
+from subprocess import run, PIPE
 from urllib.parse import urljoin
 
-from IPython.html.notebookapp import list_running_servers
-from IPython.utils.process import check_pid
+from notebook.notebookapp import list_running_servers
+from notebook.utils import check_pid
 import requests
+
 
 class NbServer:
     pid = port = url = notebook_dir = None
+
     def __init__(self, info):
         self.pid = info['pid']
         self.port = info['port']
@@ -44,9 +48,18 @@ class NbServer:
         except requests.ConnectionError:
             return False
 
+    def server(self):
+        called = run('jupyter notebook list --json'.split(' '), check=True, stdout=PIPE, encoding='utf-8')
+        for jsn in called.stdout.strip().split('\n'):
+            server = json.loads(jsn)
+            if server['url'] == self.url:
+                return server
+        return {}
+
     def sessions(self):
+        params = {k: v for k, v in self.server().items() if k == 'token'}
         try:
-            r = requests.get(urljoin(self.url, 'api/sessions'))
+            r = requests.get(urljoin(self.url, 'api/sessions'), params=params)
         except requests.ConnectionError:
             self.last_sessions = []
         else:
@@ -77,13 +90,14 @@ class NbServer:
         # os.waitpid() only works with child processes, so we need a busy loop
         pid = self.pid
         while check_pid(pid):
-            time.sleep(0.01)
+            time.sleep(interval)
 
     def stop_session(self, sid):
         r = requests.delete(urljoin(self.url, 'api/sessions/%s' % sid))
         r.raise_for_status()
 
-def launch_server(directory, **kwargs):
+
+def launch_server(directory, **_):
     import subprocess
     cmd = [sys.executable, '-m', 'IPython.html', directory, '--no-browser']
     if sys.platform == 'darwin' and not sys.stdin.isatty():
