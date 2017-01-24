@@ -37,27 +37,13 @@ class ServerWaiterThread(QtCore.QThread):
         self.finished.emit()
 
 class Main(QtWidgets.QMainWindow):
-    _nb_icon = None
-    @property
-    def nb_icon(self):
-        if self._nb_icon is None:
-            self._nb_icon = QtGui.QIcon.fromTheme('x-ipynb+json', QtGui.QIcon(':/icons/icons/ipynb_icon_16x16.png'))
-        return self._nb_icon
-
-    _server_icon = None
-    @property
-    def server_icon(self):
-        if self._server_icon is None:
-            self._server_icon = QtGui.QIcon.fromTheme('go-home')
-        return self._server_icon
-    
     _path_valid = True
 
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowIcon(self.nb_icon)
+        self.setWindowIcon(QtGui.QIcon.fromTheme('jupyter-nbmanager'))
 
         self.servers_by_pid = {}
         self.sessions_by_sid = {}
@@ -82,7 +68,7 @@ class Main(QtWidgets.QMainWindow):
 
     def add_server(self, server):
         server_item = ServerItem(server)
-        server_item.setIcon(self.server_icon)
+        server_item.setIcon(QtGui.QIcon.fromTheme('go-home'))
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
 
@@ -93,7 +79,7 @@ class Main(QtWidgets.QMainWindow):
 
     def add_session(self, session, parent):
         session_item = SessionItem(session, parent.server)
-        session_item.setIcon(self.nb_icon)
+        session_item.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
 
@@ -183,8 +169,30 @@ class Main(QtWidgets.QMainWindow):
         path = self.ui.start_dir_lineedit.text()
         api.launch_server(path)
 
+
+def theme_warning(*msg):
+    print('NBManager:', *msg, '– using builtin theme', file=sys.stderr)
+
+
+def install_theme():
+    ignore_varname = 'NBMANAGER_IGNORE_THEME'
+    forced = os.environ.get(ignore_varname, '')
+    no_theme = not QtGui.QIcon.themeName()
+    if forced:
+        theme_warning(ignore_varname, 'set')
+        paths = QtGui.QIcon.themeSearchPaths()
+        builtin = paths.pop(paths.index(':/icons'))
+        QtGui.QIcon.setThemeSearchPaths([builtin] + paths)  # this is always available, but we force its use
+    elif no_theme:
+        theme_warning('no available theme found')
+
+    if forced or no_theme:
+        QtGui.QIcon.setThemeName('nbmanager-icons')
+
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    install_theme()
     window = Main()
     if sys.stderr is None:
         sys.excepthook = window.excepthook
