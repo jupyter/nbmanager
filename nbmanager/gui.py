@@ -1,31 +1,36 @@
 import os.path
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-QtCore.Signal = QtCore.pyqtSignal
+from PyQt5.QtCore import Qt, QThread, QTimer, pyqtSignal as Signal
+from PyQt5.QtGui import QIcon, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
-class ServerItem(QtGui.QStandardItem):
+
+class ServerItem(QStandardItem):
     def __init__(self, server):
         super().__init__(server.notebook_dir)
         self.server = server
 
-class SessionItem(QtGui.QStandardItem):
+
+class SessionItem(QStandardItem):
     def __init__(self, session, server):
         super().__init__()
         self.session = session
         self.server = server
 
-    def data(self, role=QtCore.Qt.UserRole+1):
-        if role == QtCore.Qt.DisplayRole:
+    def data(self, role=Qt.UserRole+1, *args, **kwargs):
+        if role == Qt.DisplayRole:
             return self.session['notebook']['path']
         return super().data(role)
 
-class ServerWaiterThread(QtCore.QThread):
+
+class ServerWaiterThread(QThread):
     registry = set()  # Keep a global reference so threads aren't GCed too soon
 
-    finished = QtCore.Signal()
+    finished = Signal(name='finished')
+
     def __init__(self, server, parent=None):
         super().__init__(parent)
         self.server = server
@@ -36,39 +41,25 @@ class ServerWaiterThread(QtCore.QThread):
         self.server.wait()
         self.finished.emit()
 
-class Main(QtWidgets.QMainWindow):
-    _nb_icon = None
-    @property
-    def nb_icon(self):
-        if self._nb_icon is None:
-            self._nb_icon = QtGui.QIcon()
-            self._nb_icon.addPixmap(QtGui.QPixmap(":/icons/icons/ipynb_icon_16x16.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        return self._nb_icon
 
-    _server_icon = None
-    @property
-    def server_icon(self):
-        if self._server_icon is None:
-            self._server_icon = QtGui.QIcon()
-            self._server_icon.addPixmap(QtGui.QPixmap(":/icons/icons/home.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        return self._server_icon
-    
+class Main(QMainWindow):
     _path_valid = True
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowIcon(self.nb_icon)
+        self.setWindowIcon(QIcon.fromTheme('jupyter-nbmanager'))
 
         self.servers_by_pid = {}
+        self.current_servers = []
         self.sessions_by_sid = {}
 
-        self.processes_model = QtGui.QStandardItemModel()
+        self.processes_model = QStandardItemModel()
         self.ui.treeView.setModel(self.processes_model)
         self.processes_root = self.processes_model.invisibleRootItem()
         self.populate_processes()
-        self.autorefresh = QtCore.QTimer(self)
+        self.autorefresh = QTimer(self)
         self.autorefresh.timeout.connect(self.refresh_processes)
         self.autorefresh.start(1000)
 
@@ -84,7 +75,7 @@ class Main(QtWidgets.QMainWindow):
 
     def add_server(self, server):
         server_item = ServerItem(server)
-        server_item.setIcon(self.server_icon)
+        server_item.setIcon(QIcon.fromTheme('go-home'))
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
 
@@ -95,7 +86,7 @@ class Main(QtWidgets.QMainWindow):
 
     def add_session(self, session, parent):
         session_item = SessionItem(session, parent.server)
-        session_item.setIcon(self.nb_icon)
+        session_item.setIcon(QIcon.fromTheme('application-x-ipynb+json'))
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
 
@@ -159,9 +150,9 @@ class Main(QtWidgets.QMainWindow):
         path = self.ui.start_dir_lineedit.text()
         if not os.path.isdir(path):
             path = os.path.expanduser('~')
-        path = QtWidgets.QFileDialog.getExistingDirectory(self,
-                      "Choose directory for new notebook server",
-                      path, QtWidgets.QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(
+            self, "Choose directory for new notebook server",
+            path, QFileDialog.ShowDirsOnly)
         # Cancelled dialog -> empty string
         if path:
             self.ui.start_dir_lineedit.setText(path)
@@ -185,8 +176,29 @@ class Main(QtWidgets.QMainWindow):
         path = self.ui.start_dir_lineedit.text()
         api.launch_server(path)
 
+
+def theme_warning(msg):
+    print('NBManager:', msg, '– using builtin theme', file=sys.stderr)
+
+
+def install_theme():
+    forced = os.environ.get('NBMANAGER_IGNORE_THEME', '')
+    no_theme = not QIcon.themeName()
+    if forced:
+        theme_warning('NBCONVERT_IGNORE_THEME set')
+        paths = QIcon.themeSearchPaths()
+        builtin = paths.pop(paths.index(':/icons'))
+        QIcon.setThemeSearchPaths([builtin] + paths)  # this is always available, but we force its use
+    elif no_theme:
+        theme_warning('no available theme found')
+
+    if forced or no_theme:
+        QIcon.setThemeName('nbmanager-icons')
+
+
 def main():
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
+    install_theme()
     window = Main()
     if sys.stderr is None:
         sys.excepthook = window.excepthook
