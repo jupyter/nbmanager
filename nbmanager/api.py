@@ -4,8 +4,8 @@ import sys
 import time
 from urllib.parse import urljoin
 
-from IPython.html.notebookapp import list_running_servers
-from IPython.utils.process import check_pid
+from notebook.notebookapp import list_running_servers
+from notebook.utils import check_pid
 import requests
 
 class NbServer:
