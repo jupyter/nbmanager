@@ -2,4 +2,6 @@ __pycache__
 build/
 dist/
 nbmanager.egg-info/
+.idea/
 nbmanager.icns
+nbmanager.iconset/
