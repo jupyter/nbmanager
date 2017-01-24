@@ -15,6 +15,7 @@ class NbServer:
         self.port = info['port']
         self.url = info['url']
         self.notebook_dir = info['notebook_dir']
+        self.token = info.get('token', '')
 
         self.last_sessions = []
 
@@ -45,8 +46,12 @@ class NbServer:
             return False
 
     def sessions(self):
+        params = {}
+        if self.token:
+            params['token'] = self.token
+
         try:
-            r = requests.get(urljoin(self.url, 'api/sessions'))
+            r = requests.get(urljoin(self.url, 'api/sessions'), params=params)
         except requests.ConnectionError:
             self.last_sessions = []
         else:
