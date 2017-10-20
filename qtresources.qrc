@@ -2,9 +2,9 @@
   <qresource>
     <file>icons/nbmanager-builtin/index.theme</file>
     <file>icons/nbmanager-builtin/16x16/mimetypes/application-x-ipynb+json.png</file>
-    <file>icons/nbmanager-builtin/16x16/actions/process-stop.png</file>
     <file>icons/nbmanager-builtin/16x16/actions/view-refesh.png</file>
     <file>icons/nbmanager-builtin/16x16/actions/system-run.png</file>
+    <file>icons/nbmanager-builtin/16x16/actions/process-stop.png</file>
     <file>icons/nbmanager-builtin/16x16/actions/go-home.png</file>
     <file>icons/hicolor/index.theme</file>
     <file>icons/hicolor/16x16/apps/jupyter-nbmanager.png</file>

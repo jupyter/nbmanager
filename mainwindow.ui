@@ -90,20 +90,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionShutdown"/>
    <addaction name="actionRefresh"/>
   </widget>
-  <action name="actionShutdown">
-   <property name="icon">
-    <iconset theme="process-stop"/>
-   </property>
-   <property name="text">
-    <string>Shutdown</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shut down the selected notebook server or session&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </action>
   <action name="actionRefresh">
    <property name="icon">
     <iconset theme="view-refresh"/>

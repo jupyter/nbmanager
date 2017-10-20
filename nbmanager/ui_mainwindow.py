@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.7.1
+# Created by: PyQt5 UI code generator 5.9
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -54,15 +54,10 @@ class Ui_MainWindow(object):
         self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.actionShutdown = QtWidgets.QAction(MainWindow)
-        icon = QtGui.QIcon.fromTheme("process-stop")
-        self.actionShutdown.setIcon(icon)
-        self.actionShutdown.setObjectName("actionShutdown")
         self.actionRefresh = QtWidgets.QAction(MainWindow)
         icon = QtGui.QIcon.fromTheme("view-refresh")
         self.actionRefresh.setIcon(icon)
         self.actionRefresh.setObjectName("actionRefresh")
-        self.toolBar.addAction(self.actionShutdown)
         self.toolBar.addAction(self.actionRefresh)
 
         self.retranslateUi(MainWindow)
@@ -75,8 +70,6 @@ class Ui_MainWindow(object):
         self.choose_dir_button.setText(_translate("MainWindow", "Choose directory"))
         self.launch_button.setText(_translate("MainWindow", "Launch"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
-        self.actionShutdown.setText(_translate("MainWindow", "Shutdown"))
-        self.actionShutdown.setToolTip(_translate("MainWindow", "<html><head/><body><p>Shut down the selected notebook server or session</p></body></html>"))
         self.actionRefresh.setText(_translate("MainWindow", "Refresh"))
         self.actionRefresh.setToolTip(_translate("MainWindow", "Refresh the list of processes"))
 

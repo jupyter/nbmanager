@@ -1,14 +1,61 @@
 import os.path
 import sys
+import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 QtCore.Signal = QtCore.pyqtSignal
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
+class ItemWidget(QtWidgets.QWidget):
+    def __init__(self, item, shutdown_callback):
+        super().__init__()
+        self.item = item
+        self.shutdown_callback = shutdown_callback
+        
+        label = QtWidgets.QLabel(self.label)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        link_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('link'), '')
+        link_button.clicked.connect(self.open_browser)
+        shutdown_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('process-stop'), '')
+        shutdown_button.clicked.connect(self.shutdown)
+        
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.addWidget(label)
+        layout.addWidget(link_button)
+        layout.addWidget(shutdown_button)
+
+class ServerWidget(ItemWidget):
+    @property
+    def label(self):
+        return self.item.server.notebook_dir
+    
+    def open_browser(self):
+        webbrowser.open('{}?token={}'.format(self.item.server.url, self.item.server.token))
+    
+    def shutdown(self):
+        self.item.server.shutdown(wait=False)
+        swt = ServerWaiterThread(self.item.server)
+        swt.finished.connect(self.shutdown_callback)
+        swt.start()
+
+class SessionWidget(ItemWidget):
+    @property
+    def label(self):
+        return self.item.session['notebook']['path']
+    
+    def open_browser(self):
+        print(self.item.session)
+        webbrowser.open('{}notebooks/{}?token={}'.format(self.item.server.url, self.label, self.item.server.token))
+    
+    def shutdown(self):
+        sid = self.item.session['id']
+        self.item.server.stop_session(sid)
+        self.shutdown_callback()
+
 class ServerItem(QtGui.QStandardItem):
     def __init__(self, server):
-        super().__init__(server.notebook_dir)
+        super().__init__()
         self.server = server
         self.setEditable(False)
         self.setIcon(QtGui.QIcon.fromTheme('go-home'))
@@ -20,11 +67,6 @@ class SessionItem(QtGui.QStandardItem):
         self.server = server
         self.setEditable(False)
         self.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
-
-    def data(self, role=QtCore.Qt.UserRole+1):
-        if role == QtCore.Qt.DisplayRole:
-            return self.session['notebook']['path']
-        return super().data(role)
 
 class ServerWaiterThread(QtCore.QThread):
     registry = set()  # Keep a global reference so threads aren't GCed too soon
@@ -60,7 +102,6 @@ class Main(QtWidgets.QMainWindow):
         self.autorefresh.timeout.connect(self.refresh_processes)
         self.autorefresh.start(1000)
 
-        self.ui.actionShutdown.triggered.connect(self.shutdown)
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
         
         # Launching UI
@@ -74,6 +115,7 @@ class Main(QtWidgets.QMainWindow):
         server_item = ServerItem(server)
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
+        self.ui.treeView.setIndexWidget(server_item.index(), ServerWidget(server_item, self.refresh_processes))
 
         for session in server.sessions():
             self.add_session(session, server_item)
@@ -84,6 +126,7 @@ class Main(QtWidgets.QMainWindow):
         session_item = SessionItem(session, parent.server)
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
+        self.ui.treeView.setIndexWidget(session_item.index(), SessionWidget(session_item, self.refresh_processes))
 
     def populate_processes(self):
         self.current_servers = api.NbServer.findall()
@@ -120,25 +163,6 @@ class Main(QtWidgets.QMainWindow):
                 if sess_item.session != sess:
                     sess_item.session = sess
                     sess_item.emitDataChanged()
-
-    def selected_process(self):
-        idxs = self.ui.treeView.selectedIndexes()
-        if idxs:
-            return self.processes_model.itemFromIndex(idxs[0])
-        return None
-
-    def shutdown(self):
-        selected_proc = self.selected_process()
-        if isinstance(selected_proc, ServerItem):
-            server = selected_proc.server
-            server.shutdown(wait=False)
-            swt = ServerWaiterThread(server)
-            swt.finished.connect(self.refresh_processes)
-            swt.start()
-        elif isinstance(selected_proc, SessionItem):
-            sid = selected_proc.session['id']
-            selected_proc.server.stop_session(sid)
-            self.refresh_processes()
 
     # Launching UI
     def choose_dir(self):
