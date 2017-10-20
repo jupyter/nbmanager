@@ -10,12 +10,16 @@ class ServerItem(QtGui.QStandardItem):
     def __init__(self, server):
         super().__init__(server.notebook_dir)
         self.server = server
+        self.setEditable(False)
+        self.setIcon(QtGui.QIcon.fromTheme('go-home'))
 
 class SessionItem(QtGui.QStandardItem):
     def __init__(self, session, server):
         super().__init__()
         self.session = session
         self.server = server
+        self.setEditable(False)
+        self.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
 
     def data(self, role=QtCore.Qt.UserRole+1):
         if role == QtCore.Qt.DisplayRole:
@@ -68,7 +72,6 @@ class Main(QtWidgets.QMainWindow):
 
     def add_server(self, server):
         server_item = ServerItem(server)
-        server_item.setIcon(QtGui.QIcon.fromTheme('go-home'))
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
 
@@ -79,7 +82,6 @@ class Main(QtWidgets.QMainWindow):
 
     def add_session(self, session, parent):
         session_item = SessionItem(session, parent.server)
-        session_item.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
 
