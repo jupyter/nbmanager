@@ -9,10 +9,10 @@ echo "Installing data files to: ${XDG_DATA_HOME:=$HOME/.local/share}"
 #export XDG_UTILS_DEBUG_LEVEL=1  #DEBUG
 
 for s in 48 64 128; do
-    xdg-icon-resource install --noupdate --size $s --context apps "icons/nbmanager-${s}.png" ipython-nbmanager
+    xdg-icon-resource install --noupdate --size $s --context apps "icons/hicolor/apps/${size}x${size}/jupyter-nbmanager.png" jupyter-nbmanager
 done
 xdg-icon-resource forceupdate
 
-cp nbmanager.desktop "$XDG_DATA_HOME/applications/"
-update-desktop-database "$XDG_DATA_HOME/applications/"
+xdg-desktop-menu install jupyter-nbmanager.desktop
+#update-desktop-database "$XDG_DATA_HOME/applications/"
 

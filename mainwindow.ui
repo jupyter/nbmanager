@@ -44,6 +44,9 @@
            <property name="text">
             <string>Choose directory</string>
            </property>
+           <property name="icon">
+            <iconset theme="document-open-folder"/>
+           </property>
           </widget>
          </item>
          <item>
@@ -52,8 +55,7 @@
             <string>Launch</string>
            </property>
            <property name="icon">
-            <iconset resource="qtresources.qrc">
-             <normaloff>:/icons/icons/right.png</normaloff>:/icons/icons/right.png</iconset>
+            <iconset theme="system-run"/>
            </property>
           </widget>
          </item>
@@ -70,7 +72,7 @@
      <x>0</x>
      <y>0</y>
      <width>382</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
@@ -88,25 +90,11 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionShutdown"/>
    <addaction name="actionRefresh"/>
   </widget>
-  <action name="actionShutdown">
-   <property name="icon">
-    <iconset resource="qtresources.qrc">
-     <normaloff>:/icons/icons/stop.png</normaloff>:/icons/icons/stop.png</iconset>
-   </property>
-   <property name="text">
-    <string>Shutdown</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shut down the selected notebook server or session&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset resource="qtresources.qrc">
-     <normaloff>:/icons/icons/reload.png</normaloff>:/icons/icons/reload.png</iconset>
+    <iconset theme="view-refresh"/>
    </property>
    <property name="text">
     <string>Refresh</string>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.5.1
+# Created by: PyQt5 UI code generator 5.9
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -31,11 +31,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.choose_dir_button = QtWidgets.QPushButton(self.groupBox)
+        icon = QtGui.QIcon.fromTheme("document-open-folder")
+        self.choose_dir_button.setIcon(icon)
         self.choose_dir_button.setObjectName("choose_dir_button")
         self.horizontalLayout.addWidget(self.choose_dir_button)
         self.launch_button = QtWidgets.QPushButton(self.groupBox)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/icons/right.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QtGui.QIcon.fromTheme("system-run")
         self.launch_button.setIcon(icon)
         self.launch_button.setObjectName("launch_button")
         self.horizontalLayout.addWidget(self.launch_button)
@@ -43,7 +44,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.groupBox)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 382, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 382, 27))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -53,17 +54,10 @@ class Ui_MainWindow(object):
         self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.actionShutdown = QtWidgets.QAction(MainWindow)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/icons/stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionShutdown.setIcon(icon1)
-        self.actionShutdown.setObjectName("actionShutdown")
         self.actionRefresh = QtWidgets.QAction(MainWindow)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/icons/reload.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionRefresh.setIcon(icon2)
+        icon = QtGui.QIcon.fromTheme("view-refresh")
+        self.actionRefresh.setIcon(icon)
         self.actionRefresh.setObjectName("actionRefresh")
-        self.toolBar.addAction(self.actionShutdown)
         self.toolBar.addAction(self.actionRefresh)
 
         self.retranslateUi(MainWindow)
@@ -76,8 +70,6 @@ class Ui_MainWindow(object):
         self.choose_dir_button.setText(_translate("MainWindow", "Choose directory"))
         self.launch_button.setText(_translate("MainWindow", "Launch"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
-        self.actionShutdown.setText(_translate("MainWindow", "Shutdown"))
-        self.actionShutdown.setToolTip(_translate("MainWindow", "<html><head/><body><p>Shut down the selected notebook server or session</p></body></html>"))
         self.actionRefresh.setText(_translate("MainWindow", "Refresh"))
         self.actionRefresh.setToolTip(_translate("MainWindow", "Refresh the list of processes"))
 
