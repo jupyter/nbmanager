@@ -1,6 +1,10 @@
 from setuptools import setup
 import sys
 
+from uic2 import compile_ui
+
+compile_ui()
+
 if sys.platform == 'darwin':
     extra_options = dict(
         app=['nbmanager.py'],

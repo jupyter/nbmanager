@@ -1,7 +1,15 @@
 __pycache__
-build/
-dist/
-nbmanager.egg-info/
-.idea/
-nbmanager.icns
-nbmanager.iconset/
+/build/
+/dist/
+/nbmanager.egg-info/
+/.idea/
+
+# icons
+/icons/*/index.theme
+/nbmanager.icns
+/nbmanager.iconset/
+
+# PyQt5 UI and resources
+/nbmanager/qtresources_rc.py
+/nbmanager/ui_*.py
+/qtresources.qrc

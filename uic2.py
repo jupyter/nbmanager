@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-from subprocess import call
 from pathlib import Path
 
 from PyQt5.uic import compileUi
+from PyQt5.pyrcc_main import processResourceFile
 
 here = Path(__file__).parent  # type: Path
 path_qrc = here / 'qtresources.qrc'
@@ -59,6 +59,7 @@ def all_sizes(dir_theme):
         return int(n) if n != 'scalable' else 10000
     return sorted((p.name.split('x')[0] for p in dir_theme.iterdir() if p.is_dir()), key=k)
 
+
 iconset_sizes = {16, 32, 128, 256, 512}
 
 
@@ -92,10 +93,10 @@ def resource():
 
     pyfn = (dir_nbmanager / (path_qrc.stem + '_rc')).with_suffix('.py')
     print(path_qrc, '→', pyfn)
-    call('pyrcc5 -o {} {}'.format(pyfn, path_qrc), shell=True)
+    processResourceFile([str(path_qrc)], str(pyfn), False)
 
 
-def icons():
+def icon_themes():
     dirs = []
     sections = []
 
@@ -120,7 +121,7 @@ def icons():
             ))
 
 
-def iconset():
+def icon_set():
     print(dir_iconset / '*')
     dir_iconset.mkdir(exist_ok=True)
     for size, size_dir in sizedirs(dir_themes / 'hicolor', iconset_sizes):
@@ -135,8 +136,12 @@ def iconset():
             link.symlink_to('..' / target)
 
 
-if __name__ == '__main__':
+def compile_ui():
     ui()
+    icon_themes()
     resource()
-    icons()
-    iconset()
+    icon_set()
+
+
+if __name__ == '__main__':
+    compile_ui()
