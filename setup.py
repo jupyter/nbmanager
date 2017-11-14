@@ -12,7 +12,6 @@ if sys.platform == 'darwin':
         }},
         setup_requires=['py2app']
     )
-
 else:
     extra_options = {}
 
@@ -29,4 +28,5 @@ setup(name='nbmanager',
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python :: 3",
       ],
+      install_requires=['PyQt5', 'notebook', 'requests'],
       **extra_options)

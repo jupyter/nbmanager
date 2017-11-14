@@ -3,55 +3,60 @@ import sys
 import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-QtCore.Signal = QtCore.pyqtSignal
 from .ui_mainwindow import Ui_MainWindow
 from . import api
+
+QtCore.Signal = QtCore.pyqtSignal
+
 
 class ItemWidget(QtWidgets.QWidget):
     def __init__(self, item, shutdown_callback):
         super().__init__()
         self.item = item
         self.shutdown_callback = shutdown_callback
-        
+
         label = QtWidgets.QLabel(self.label)
         label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         link_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('link'), '')
         link_button.clicked.connect(self.open_browser)
         shutdown_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('process-stop'), '')
         shutdown_button.clicked.connect(self.shutdown)
-        
+
         layout = QtWidgets.QHBoxLayout(self)
         layout.addWidget(label)
         layout.addWidget(link_button)
         layout.addWidget(shutdown_button)
 
+
 class ServerWidget(ItemWidget):
     @property
     def label(self):
         return self.item.server.notebook_dir
-    
+
     def open_browser(self):
         webbrowser.open('{}?token={}'.format(self.item.server.url, self.item.server.token))
-    
+
     def shutdown(self):
         self.item.server.shutdown(wait=False)
         swt = ServerWaiterThread(self.item.server)
         swt.finished.connect(self.shutdown_callback)
         swt.start()
 
+
 class SessionWidget(ItemWidget):
     @property
     def label(self):
         return self.item.session['notebook']['path']
-    
+
     def open_browser(self):
         print(self.item.session)
         webbrowser.open('{}notebooks/{}?token={}'.format(self.item.server.url, self.label, self.item.server.token))
-    
+
     def shutdown(self):
         sid = self.item.session['id']
         self.item.server.stop_session(sid)
         self.shutdown_callback()
+
 
 class ServerItem(QtGui.QStandardItem):
     def __init__(self, server):
@@ -59,6 +64,7 @@ class ServerItem(QtGui.QStandardItem):
         self.server = server
         self.setEditable(False)
         self.setIcon(QtGui.QIcon.fromTheme('go-home'))
+
 
 class SessionItem(QtGui.QStandardItem):
     def __init__(self, session, server):
@@ -68,10 +74,12 @@ class SessionItem(QtGui.QStandardItem):
         self.setEditable(False)
         self.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
 
+
 class ServerWaiterThread(QtCore.QThread):
     registry = set()  # Keep a global reference so threads aren't GCed too soon
 
     finished = QtCore.Signal()
+
     def __init__(self, server, parent=None):
         super().__init__(parent)
         self.server = server
@@ -81,6 +89,7 @@ class ServerWaiterThread(QtCore.QThread):
     def run(self):
         self.server.wait()
         self.finished.emit()
+
 
 class Main(QtWidgets.QMainWindow):
     _path_valid = True
@@ -103,7 +112,7 @@ class Main(QtWidgets.QMainWindow):
         self.autorefresh.start(1000)
 
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
-        
+
         # Launching UI
         self.ui.start_dir_lineedit.setText(os.path.expanduser('~'))
         self.ui.start_dir_lineedit.editingFinished.connect(self.validate_dir)
@@ -190,7 +199,7 @@ class Main(QtWidgets.QMainWindow):
             # Don't mark it as invalid until the user finishes editing
             return
         self.validate_dir(path)
-    
+
     def launch(self):
         path = self.ui.start_dir_lineedit.text()
         api.launch_server(path)
@@ -224,6 +233,7 @@ def main():
         sys.excepthook = window.excepthook
     window.show()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()

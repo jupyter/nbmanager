@@ -8,8 +8,10 @@ from notebook.notebookapp import list_running_servers
 from notebook.utils import check_pid
 import requests
 
+
 class NbServer:
     pid = port = url = notebook_dir = None
+
     def __init__(self, info):
         self.pid = info['pid']
         self.port = info['port']
@@ -77,16 +79,17 @@ class NbServer:
 
         if wait:
             self.wait()
-    
+
     def wait(self, interval=0.01):
         # os.waitpid() only works with child processes, so we need a busy loop
         pid = self.pid
         while check_pid(pid):
-            time.sleep(0.01)
+            time.sleep(interval)
 
     def stop_session(self, sid):
         r = requests.delete(urljoin(self.url, 'api/sessions/%s' % sid))
         r.raise_for_status()
+
 
 def launch_server(directory, **kwargs):
     import subprocess
