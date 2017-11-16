@@ -17,6 +17,15 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTreeView" name="treeView">
+      <property name="styleSheet">
+       <string notr="true">QTreeView { background-color: transparent }</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
       <property name="iconSize">
        <size>
         <width>16</width>
