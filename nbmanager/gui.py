@@ -1,6 +1,8 @@
 import os.path
 import sys
 import webbrowser
+from enum import Enum
+from typing import Callable, Union
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from .ui_mainwindow import Ui_MainWindow
@@ -9,17 +11,62 @@ from . import api
 QtCore.Signal = QtCore.pyqtSignal
 
 
-class ItemWidget(QtWidgets.QWidget):
-    def __init__(self, item, shutdown_callback):
+class Icon(Enum):
+    NbManager = 'jupyter-nbmanager'
+    Server = 'go-home'
+    Session = 'application-x-ipynb+json'
+    Link = 'link'
+    Shutdown = 'process-stop'
+
+    @property
+    def icon(self):
+        return QtGui.QIcon.fromTheme(self.value)
+
+
+class ActionItem(QtGui.QStandardItem):
+    def __init__(self, action: QtWidgets.QAction):
+        super().__init__()
+        self.action = action
+        self.setEditable(False)
+        self.setSelectable(False)
+
+
+class ServerItem(QtGui.QStandardItem):
+    def __init__(self, server, icon=None):
+        super().__init__()
+        self.server = server
+        self.setEditable(False)
+        self.setIcon(icon or Icon.Server.icon)
+
+
+class SessionItem(ServerItem):
+    def __init__(self, session, server):
+        super().__init__(server, Icon.Session.icon)
+        self.session = session
+
+
+class ActionRow(QtWidgets.QWidget):
+    def __init__(self, action: QtWidgets.QAction):
+        super().__init__()
+        button = QtWidgets.QPushButton(action.icon(), action.text())
+        button.clicked.connect(action.trigger)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.addWidget(button)
+        # layout.addWidget(label)
+
+
+class ItemRow(QtWidgets.QWidget):
+    def __init__(self, item: Union[ServerItem, SessionItem], shutdown_callback: Callable):
         super().__init__()
         self.item = item
         self.shutdown_callback = shutdown_callback
 
         label = QtWidgets.QLabel(self.label)
         label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        link_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('link'), '')
+        link_button = QtWidgets.QPushButton(Icon.Link.icon, '')
         link_button.clicked.connect(self.open_browser)
-        shutdown_button = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('process-stop'), '')
+        shutdown_button = QtWidgets.QPushButton(Icon.Shutdown.icon, '')
         shutdown_button.clicked.connect(self.shutdown)
 
         layout = QtWidgets.QHBoxLayout(self)
@@ -28,7 +75,7 @@ class ItemWidget(QtWidgets.QWidget):
         layout.addWidget(shutdown_button)
 
 
-class ServerWidget(ItemWidget):
+class ServerRow(ItemRow):
     @property
     def label(self):
         return self.item.server.notebook_dir
@@ -43,7 +90,7 @@ class ServerWidget(ItemWidget):
         swt.start()
 
 
-class SessionWidget(ItemWidget):
+class SessionRow(ItemRow):
     @property
     def label(self):
         return self.item.session['notebook']['path']
@@ -56,23 +103,6 @@ class SessionWidget(ItemWidget):
         sid = self.item.session['id']
         self.item.server.stop_session(sid)
         self.shutdown_callback()
-
-
-class ServerItem(QtGui.QStandardItem):
-    def __init__(self, server):
-        super().__init__()
-        self.server = server
-        self.setEditable(False)
-        self.setIcon(QtGui.QIcon.fromTheme('go-home'))
-
-
-class SessionItem(QtGui.QStandardItem):
-    def __init__(self, session, server):
-        super().__init__()
-        self.session = session
-        self.server = server
-        self.setEditable(False)
-        self.setIcon(QtGui.QIcon.fromTheme('application-x-ipynb+json'))
 
 
 class ServerWaiterThread(QtCore.QThread):
@@ -98,18 +128,19 @@ class Main(QtWidgets.QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowIcon(QtGui.QIcon.fromTheme('jupyter-nbmanager'))
+        self.setWindowIcon(Icon.NbManager.icon)
 
         self.servers_by_pid = {}
         self.sessions_by_sid = {}
+        self.current_servers = []
 
         self.processes_model = QtGui.QStandardItemModel()
-        self.ui.treeView.setModel(self.processes_model)
-        self.processes_root = self.processes_model.invisibleRootItem()
+        self.ui.tree.setModel(self.processes_model)
+        self.processes_root = self.init_root()
         self.populate_processes()
-        self.autorefresh = QtCore.QTimer(self)
-        self.autorefresh.timeout.connect(self.refresh_processes)
-        self.autorefresh.start(1000)
+        self.auto_refresh = QtCore.QTimer(self)
+        self.auto_refresh.timeout.connect(self.refresh_processes)
+        self.auto_refresh.start(1000)
 
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
 
@@ -120,22 +151,29 @@ class Main(QtWidgets.QMainWindow):
         self.ui.choose_dir_button.clicked.connect(self.choose_dir)
         self.ui.launch_button.clicked.connect(self.launch)
 
+    def init_root(self):
+        root = ActionItem(self.ui.actionRefresh)
+        self.processes_model.invisibleRootItem().appendRow(root)
+        self.ui.tree.setIndexWidget(root.index(), ActionRow(root.action))
+        self.ui.tree.expand(root.index())
+        return root
+
     def add_server(self, server):
         server_item = ServerItem(server)
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
-        self.ui.treeView.setIndexWidget(server_item.index(), ServerWidget(server_item, self.refresh_processes))
+        self.ui.tree.setIndexWidget(server_item.index(), ServerRow(server_item, self.refresh_processes))
 
         for session in server.sessions():
             self.add_session(session, server_item)
 
-        self.ui.treeView.expand(server_item.index())
+        self.ui.tree.expand(server_item.index())
 
     def add_session(self, session, parent):
         session_item = SessionItem(session, parent.server)
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
-        self.ui.treeView.setIndexWidget(session_item.index(), SessionWidget(session_item, self.refresh_processes))
+        self.ui.tree.setIndexWidget(session_item.index(), SessionRow(session_item, self.refresh_processes))
 
     def populate_processes(self):
         self.current_servers = api.NbServer.findall()
@@ -178,9 +216,9 @@ class Main(QtWidgets.QMainWindow):
         path = self.ui.start_dir_lineedit.text()
         if not os.path.isdir(path):
             path = os.path.expanduser('~')
-        path = QtWidgets.QFileDialog.getExistingDirectory(self,
-                      "Choose directory for new notebook server",
-                      path, QtWidgets.QFileDialog.ShowDirsOnly)
+        path = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "Choose directory for new notebook server",
+            path, QtWidgets.QFileDialog.ShowDirsOnly)
         # Cancelled dialog -> empty string
         if path:
             self.ui.start_dir_lineedit.setText(path)
