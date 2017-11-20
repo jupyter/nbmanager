@@ -139,8 +139,8 @@ def icon_set():
 def compile_ui():
     ui()
     icon_themes()
-    resource()
     icon_set()
+    resource()
 
 
 if __name__ == '__main__':
