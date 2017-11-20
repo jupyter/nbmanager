@@ -135,14 +135,12 @@ class Main(QtWidgets.QMainWindow):
         self.current_servers = []
 
         self.processes_model = QtGui.QStandardItemModel()
-        self.ui.treeView.setModel(self.processes_model)
-        self.processes_root = ActionItem(self.ui.actionRefresh)
-        self.processes_model.invisibleRootItem().appendRow(self.processes_root)
-        self.ui.treeView.setIndexWidget(self.processes_root.index(), ActionRow(self.processes_root.action))
+        self.ui.tree.setModel(self.processes_model)
+        self.processes_root = self.init_root()
         self.populate_processes()
-        self.autorefresh = QtCore.QTimer(self)
-        self.autorefresh.timeout.connect(self.refresh_processes)
-        self.autorefresh.start(1000)
+        self.auto_refresh = QtCore.QTimer(self)
+        self.auto_refresh.timeout.connect(self.refresh_processes)
+        self.auto_refresh.start(1000)
 
         self.ui.actionRefresh.triggered.connect(self.refresh_processes)
 
@@ -153,22 +151,29 @@ class Main(QtWidgets.QMainWindow):
         self.ui.choose_dir_button.clicked.connect(self.choose_dir)
         self.ui.launch_button.clicked.connect(self.launch)
 
+    def init_root(self):
+        root = ActionItem(self.ui.actionRefresh)
+        self.processes_model.invisibleRootItem().appendRow(root)
+        self.ui.tree.setIndexWidget(root.index(), ActionRow(root.action))
+        self.ui.tree.expand(root.index())
+        return root
+
     def add_server(self, server):
         server_item = ServerItem(server)
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
-        self.ui.treeView.setIndexWidget(server_item.index(), ServerRow(server_item, self.refresh_processes))
+        self.ui.tree.setIndexWidget(server_item.index(), ServerRow(server_item, self.refresh_processes))
 
         for session in server.sessions():
             self.add_session(session, server_item)
 
-        self.ui.treeView.expand(server_item.index())
+        self.ui.tree.expand(server_item.index())
 
     def add_session(self, session, parent):
         session_item = SessionItem(session, parent.server)
         self.sessions_by_sid[session['id']] = session_item
         parent.appendRow(session_item)
-        self.ui.treeView.setIndexWidget(session_item.index(), SessionRow(session_item, self.refresh_processes))
+        self.ui.tree.setIndexWidget(session_item.index(), SessionRow(session_item, self.refresh_processes))
 
     def populate_processes(self):
         self.current_servers = api.NbServer.findall()

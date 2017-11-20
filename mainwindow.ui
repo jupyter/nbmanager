@@ -13,10 +13,10 @@
   <property name="windowTitle">
    <string>IPython nbmanager</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="central">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTreeView" name="treeView">
+     <widget class="QTreeView" name="tree">
       <property name="styleSheet">
        <string notr="true">QTreeView { background-color: transparent }</string>
       </property>
@@ -41,7 +41,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="launcher">
       <property name="title">
        <string>Launch a server</string>
       </property>
