@@ -5,10 +5,10 @@ from enum import Enum
 from typing import Callable, Union
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from .ui_mainwindow import Ui_MainWindow
-from . import api
 
-QtCore.Signal = QtCore.pyqtSignal
+from .ui_mainwindow import Ui_MainWindow
+from .widgets import EditableLabel
+from . import api
 
 
 class Icon(Enum):
@@ -27,20 +27,18 @@ class ActionItem(QtGui.QStandardItem):
     def __init__(self, action: QtWidgets.QAction):
         super().__init__()
         self.action = action
-        self.setEditable(False)
         self.setSelectable(False)
 
 
 class ServerItem(QtGui.QStandardItem):
-    def __init__(self, server, icon=None):
+    def __init__(self, server: api.NbServer, icon: QtGui.QIcon=None):
         super().__init__()
         self.server = server
-        self.setEditable(False)
         self.setIcon(icon or Icon.Server.icon)
 
 
 class SessionItem(ServerItem):
-    def __init__(self, session, server):
+    def __init__(self, session: dict, server: api.NbServer):
         super().__init__(server, Icon.Session.icon)
         self.session = session
 
@@ -62,20 +60,39 @@ class ItemRow(QtWidgets.QWidget):
         self.item = item
         self.shutdown_callback = shutdown_callback
 
-        label = QtWidgets.QLabel(self.label)
-        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.edit_label = EditableLabel(self.label)
+        self.edit_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         link_button = QtWidgets.QPushButton(Icon.Link.icon, '')
         link_button.clicked.connect(self.open_browser)
         shutdown_button = QtWidgets.QPushButton(Icon.Shutdown.icon, '')
         shutdown_button.clicked.connect(self.shutdown)
 
         layout = QtWidgets.QHBoxLayout(self)
-        layout.addWidget(label)
+        layout.addWidget(self.edit_label)
         layout.addWidget(link_button)
         layout.addWidget(shutdown_button)
 
+    @property
+    def editable(self):
+        return self.edit_label.editable
+
+    @editable.setter
+    def editable(self, value: bool):
+        self.edit_label.editable = value
+
+    @property
+    def label(self): raise NotImplemented
+
+    def open_browser(self): raise NotImplemented
+
+    def shutdown(self): raise NotImplemented
+
 
 class ServerRow(ItemRow):
+    def __init__(self, item: ServerItem, shutdown_callback: Callable):
+        super().__init__(item, shutdown_callback)
+        self.editable = False
+
     @property
     def label(self):
         return self.item.server.notebook_dir
@@ -91,6 +108,10 @@ class ServerRow(ItemRow):
 
 
 class SessionRow(ItemRow):
+    def __init__(self, item: SessionItem, shutdown_callback: Callable):
+        super().__init__(item, shutdown_callback)
+        self.edit_label.editingFinished.connect(self.rename)
+
     @property
     def label(self):
         return self.item.session['notebook']['path']
@@ -104,11 +125,15 @@ class SessionRow(ItemRow):
         self.item.server.stop_session(sid)
         self.shutdown_callback()
 
+    def rename(self, name):
+        print(self.item.session['id'], '→', name)
+        self.item.server.rename_session(self.item.session['id'])
+
 
 class ServerWaiterThread(QtCore.QThread):
     registry = set()  # Keep a global reference so threads aren't GCed too soon
 
-    finished = QtCore.Signal()
+    finished = QtCore.pyqtSignal()
 
     def __init__(self, server, parent=None):
         super().__init__(parent)

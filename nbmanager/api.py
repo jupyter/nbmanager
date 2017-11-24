@@ -90,6 +90,10 @@ class NbServer:
         r = requests.delete(urljoin(self.url, 'api/sessions/%s' % sid))
         r.raise_for_status()
 
+    def rename_session(self, sid, name):
+        r = requests.patch(urljoin(self.url, 'api/sessions/%s' % sid), name.encode())
+        r.raise_for_status()
+
 
 def launch_server(directory, **kwargs):
     import subprocess
