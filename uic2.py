@@ -93,7 +93,8 @@ def resource():
 
     pyfn = (dir_nbmanager / (path_qrc.stem + '_rc')).with_suffix('.py')
     print(path_qrc, '→', pyfn)
-    processResourceFile([str(path_qrc)], str(pyfn), False)
+    if not processResourceFile([str(path_qrc)], str(pyfn), False):
+        raise OSError('Error during processing of resource file')
 
 
 def icon_themes():
