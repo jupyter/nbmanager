@@ -19,7 +19,9 @@ template_qrc = '''\
 </RCC>
 '''.format
 
-template_qrc_file = '    <file>{}</file>'.format
+
+def template_qrc_file(p):
+    return '    <file>{}</file>'.format(p.relative_to(here))
 
 
 template_index = '''\
