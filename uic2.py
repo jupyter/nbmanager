@@ -1,150 +1,38 @@
 #!/usr/bin/python3
 from pathlib import Path
+from logging import basicConfig, getLogger, INFO
 
 from PyQt5.uic import compileUi
-from PyQt5.pyrcc_main import processResourceFile
+from qtico import write_theme_indices, write_resources, write_iconset
+
+
+logger = getLogger('uic2' if __name__ == '__main__' else __name__)
 
 here = Path(__file__).parent  # type: Path
-path_qrc = here / 'qtresources.qrc'
 dir_nbmanager = here / 'nbmanager'
 dir_themes = here / 'icons'
 dir_iconset = here / 'nbmanager.iconset'
+path_qrc = here / 'qtresources.qrc'
+path_rcpy = dir_nbmanager / 'qtresources_rc.py'
 
 
-template_qrc = '''\
-<RCC>
-  <qresource>
-{}
-  </qresource>
-</RCC>
-'''.format
-
-
-def template_qrc_file(p):
-    return '    <file>{}</file>'.format(p.relative_to(here))
-
-
-template_index = '''\
-[Icon Theme]
-Name={name}
-Inherits=default
-Directories={dirs}
-
-{sections}
-'''.format
-
-template_section = '''\
-[{s}x{s}/{sec}]
-Size={s}
-Type=Fixed
-Context={ctx}\
-'''.format
-
-template_scalable = '''\
-[{s}/{sec}]
-Size=512
-Type=Scalable
-MinSize=1
-MaxSize=1024
-Context={ctx}\
-'''.format
-
-contexts = dict(
-    apps='Applications',
-    mimetypes='MimeTypes',
-    actions='Actions'
-)
-
-
-def all_sizes(dir_theme):
-    def k(n):
-        return int(n) if n != 'scalable' else 10000
-    return sorted((p.name.split('x')[0] for p in dir_theme.iterdir() if p.is_dir()), key=k)
-
-
-iconset_sizes = {16, 32, 128, 256, 512}
-
-
-def sizedirs(dir_theme, sizes=None):
-    for s in (sizes or all_sizes(dir_theme)):
-        n = '{0}x{0}'.format(s) if s != 'scalable' else s
-        yield s, dir_theme / n
-
-
-def ui():
-    for uifn in here.glob('*.ui'):
-        pyfn = (dir_nbmanager / ('ui_' + uifn.stem)).with_suffix('.py')
-        print(uifn, '→', pyfn)
+def compile_ui(dir_ui: Path, dir_module: Path):
+    for uifn in dir_ui.glob('*.ui'):
+        pyfn = (dir_module / ('ui_' + uifn.stem)).with_suffix('.py')
+        logger.info('Creating ui_*.py file: %s from %s', pyfn, uifn)
         with pyfn.open('wt', encoding='utf-8') as pyfile, \
              uifn.open('rt', encoding='utf-8') as uifile:
             compileUi(uifile, pyfile, from_imports=True)
 
 
-def resource():
-    files = []
-    for dir_theme in dir_themes.iterdir():
-        files.append(template_qrc_file(dir_theme / 'index.theme'))
-        for size, size_dir in sizedirs(dir_theme):
-            for sec in size_dir.iterdir():
-                for icon in sec.iterdir():
-                    files.append(template_qrc_file(icon))
-
-    print(path_qrc)
-    with path_qrc.open('wt', encoding='utf-8') as qrc:
-        qrc.write(template_qrc('\n'.join(files)))
-
-    pyfn = (dir_nbmanager / (path_qrc.stem + '_rc')).with_suffix('.py')
-    print(path_qrc, '→', pyfn)
-    if not processResourceFile([str(path_qrc)], str(pyfn), False):
-        raise OSError('Error during processing of resource file')
-
-
-def icon_themes():
-    dirs = []
-    sections = []
-
-    for dir_theme in dir_themes.iterdir():
-        for size, size_dir in sizedirs(dir_theme):
-            for sec in size_dir.iterdir():
-                dirs.append(str(sec.relative_to(dir_theme)))
-                template = template_scalable if size == 'scalable' else template_section
-                sections.append(template(
-                    s=size,
-                    sec=sec.name,
-                    ctx=contexts[sec.name],
-                ))
-
-        index_theme = dir_theme / 'index.theme'
-        print(index_theme)
-        with index_theme.open('wt', encoding='utf-8') as index:
-            index.write(template_index(
-                name=dir_theme.name.title(),
-                dirs=','.join(dirs),
-                sections='\n\n'.join(sections),
-            ))
-
-
-def icon_set():
-    print(dir_iconset / '*')
-    dir_iconset.mkdir(exist_ok=True)
-    for size, size_dir in sizedirs(dir_themes / 'hicolor', iconset_sizes):
-        links = [dir_iconset / 'icon_{s}x{s}.png'.format(s=size)]
-        if size // 2 in iconset_sizes:
-            links += [dir_iconset / 'icon_{h}x{h}@2x.png'.format(h=size // 2)]
-
-        target = size_dir / 'apps' / 'jupyter-nbmanager.png'
-        for link in links:
-            if link.is_symlink():
-                link.unlink()
-            link.symlink_to('..' / target)
-
-
-def compile_ui():
-    ui()
-    icon_themes()
-    icon_set()
-    resource()
+def compile_all(verbose: bool=False):
+    if verbose:
+        basicConfig(level=INFO)
+    compile_ui(here, dir_nbmanager)
+    write_theme_indices(dir_themes)
+    write_resources(path_qrc, path_rcpy)
+    write_iconset('jupyter-nbmanager', dir_themes, dir_iconset)
 
 
 if __name__ == '__main__':
-    compile_ui()
+    compile_all(True)

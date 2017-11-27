@@ -5,6 +5,8 @@ from enum import Enum
 from typing import Callable, Union
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from qtico import install_icon_theme
+
 from .ui_mainwindow import Ui_MainWindow
 from . import api
 
@@ -243,29 +245,9 @@ class Main(QtWidgets.QMainWindow):
         api.launch_server(path)
 
 
-def theme_warning(*msg):
-    print('NBManager:', *msg, '– using builtin theme', file=sys.stderr)
-
-
-def install_theme():
-    ignore_varname = 'NBMANAGER_IGNORE_THEME'
-    forced = os.environ.get(ignore_varname, '')
-    no_theme = not QtGui.QIcon.themeName()
-    if forced:
-        theme_warning(ignore_varname, 'set')
-        paths = QtGui.QIcon.themeSearchPaths()
-        builtin = paths.pop(paths.index(':/icons'))
-        QtGui.QIcon.setThemeSearchPaths([builtin] + paths)  # this is always available, but we force its use
-    elif no_theme:
-        theme_warning('no available theme found')
-
-    if forced or no_theme:
-        QtGui.QIcon.setThemeName('nbmanager-icons')
-
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    install_theme()
+    install_icon_theme('nbmanager-icons', ignore_varnames=['NBMANAGER_IGNORE_THEME'])
     window = Main()
     if sys.stderr is None:
         sys.excepthook = window.excepthook
