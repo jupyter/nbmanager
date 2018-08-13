@@ -5,3 +5,4 @@ Name=IPython Nbmanager
 Icon=jupyter-nbmanager
 Exec=python3 -m nbmanager
 Terminal=false
+Categories=Development;Utility;
