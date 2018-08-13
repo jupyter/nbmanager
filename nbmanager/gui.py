@@ -17,7 +17,7 @@ class Icon(Enum):
     NbManager = 'jupyter-nbmanager'
     Server = 'go-home'
     Session = 'application-x-ipynb+json'
-    Link = 'link'
+    Link = 'go-jump'
     Shutdown = 'process-stop'
 
     @property
