@@ -93,7 +93,7 @@ class NbServer:
 
 def launch_server(directory, **kwargs):
     import subprocess
-    cmd = [sys.executable, '-m', 'IPython.html', directory, '--no-browser']
+    cmd = [sys.executable, '-m', 'jupyterlab', directory, '--no-browser']
     if sys.platform == 'darwin' and not sys.stdin.isatty():
         script = 'tell application "Terminal" to do script "{}; exit"'.format(
             ' '.join(cmd))

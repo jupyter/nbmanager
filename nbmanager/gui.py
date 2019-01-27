@@ -59,7 +59,7 @@ class ActionRow(QtWidgets.QWidget):
 
 
 class ItemRow(QtWidgets.QWidget):
-    def __init__(self, item: Union[ServerItem, SessionItem], shutdown_callback: Callable):
+    def __init__(self, item: Union[ServerItem, SessionItem], shutdown_callback: Callable[[], None]):
         super().__init__()
         self.item = item
         self.shutdown_callback = shutdown_callback
@@ -98,8 +98,7 @@ class SessionRow(ItemRow):
         return self.item.session['notebook']['path']
 
     def open_browser(self):
-        print(self.item.session)
-        webbrowser.open('{}notebooks/{}?token={}'.format(self.item.server.url, self.label, self.item.server.token))
+        webbrowser.open('{}lab/tree/{}?token={}'.format(self.item.server.url, self.label, self.item.server.token))
 
     def shutdown(self):
         sid = self.item.session['id']

@@ -35,10 +35,12 @@ setup(
     classifiers=[
       'Programming Language :: Python :: 3',
       'Programming Language :: Python :: 3.5',
+      'Programming Language :: Python :: 3.6',
+      'Programming Language :: Python :: 3.7',
       'Framework :: Jupyter',
       'License :: OSI Approved :: BSD License',
     ],
-    install_requires=['PyQt5', 'notebook', 'requests', 'qtico'],
+    install_requires=['PyQt5', 'jupyterlab', 'requests', 'qtico'],
     setup_requires=['qtico'] + extra_setup,
     **extra_options,
 )
