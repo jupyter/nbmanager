@@ -1,16 +1,24 @@
+from __future__ import annotations
+
 import importlib.resources
 import os.path
 import sys
 import webbrowser
 from enum import Enum
 from pathlib import Path
-from typing import Callable, ClassVar, Protocol, Self, Union
+from typing import TYPE_CHECKING, Protocol
 
-from PySide6 import QtCore, QtGui, QtWidgets
 from qtico import install_icon_theme
+from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.uic import loadUi
 
 from . import api
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import ClassVar, Self
+
+    from qtpy.QtGui import _QAction as QAction
 
 
 class Icon(Enum):
@@ -26,7 +34,7 @@ class Icon(Enum):
 
 
 class ActionItem(QtGui.QStandardItem):
-    def __init__(self, action: QtGui.QAction) -> None:
+    def __init__(self, action: QAction) -> None:
         super().__init__()
         self.action = action
         self.setEditable(False)
@@ -50,7 +58,7 @@ class SessionItem(ServerItem):
 
 
 class ActionRow(QtWidgets.QWidget):
-    def __init__(self, action: QtGui.QAction) -> None:
+    def __init__(self, action: QAction) -> None:
         super().__init__()
         button = QtWidgets.QPushButton(action.icon(), action.text())
         button.clicked.connect(action.trigger)
@@ -63,7 +71,7 @@ class ActionRow(QtWidgets.QWidget):
 class ItemRow(QtWidgets.QWidget):
     def __init__(
         self,
-        item: Union[ServerItem, SessionItem],
+        item: ServerItem | SessionItem,
         shutdown_callback: Callable[[], None],
     ):
         super().__init__()
@@ -147,7 +155,7 @@ class Ui(Protocol):
     choose_dir_button: QtWidgets.QPushButton
     launch_button: QtWidgets.QPushButton
 
-    actionRefresh: QtGui.QAction
+    actionRefresh: QAction
 
 
 class Main(QtWidgets.QMainWindow):

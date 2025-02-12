@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+from __future__ import annotations
+
 from logging import INFO, basicConfig, getLogger
 from pathlib import Path
 

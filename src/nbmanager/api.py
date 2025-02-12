@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 import os
 import signal
 import sys
 import time
-from collections.abc import Iterable
-from typing import Self, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 from urllib.parse import urljoin
 
 import requests
 from jupyter_server import serverapp
 from psutil import pid_exists
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Self
 
 
 class JupyerKernel(TypedDict):
