@@ -1,0 +1,31 @@
+[build-system]
+requires = ['hatchling', 'qtico', 'py2app; sys_platform == "darwin"']
+build-backend = 'hatchling.build'
+
+#from uic2 import compile_all
+#compile_all(True)
+
+
+[project]
+name = 'nbmanager'
+version = '0.1'
+description = 'View and stop running Jupyter notebooks and servers'
+authors = [{ name = 'Thomas Kluyver', email = 'thomas@kluyver.me.uk' }]
+maintainers = [{ name = 'Philipp A.', email = 'flying-sheep@web.de' }]
+urls.Source = 'https://github.com/jupyter/nbmanager'
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Framework :: Jupyter',
+    'License :: OSI Approved :: BSD License',
+]
+dependencies = ['PySide6', 'jupyterlab', 'requests', 'psutil', 'qtico']
+
+# app = ['nbmanager']
+# [options.py2app]
+# argv_emulation = true
+# packages = ['nbmanager']
+# alias = true
+# iconfile = 'nbmanager.icns'

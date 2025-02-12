@@ -8,6 +8,6 @@ Then run::
 
     python3 -m nbmanager
     
-It requires Python 3, PyQt5 and IPython 3.
+It requires Python 3, PySide6 and Jupyter.
 
 .. image:: screenshot.png
