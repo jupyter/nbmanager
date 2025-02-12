@@ -300,7 +300,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     install_icon_theme("nbmanager-icons", ignore_varnames=["NBMANAGER_IGNORE_THEME"])
     window = Main()
-    if sys.stderr is None:
+    if sys.stderr is None and hasattr(window, "excepthook"):
         sys.excepthook = window.excepthook
     window.show()
     sys.exit(app.exec_())

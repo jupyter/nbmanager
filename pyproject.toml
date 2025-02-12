@@ -40,3 +40,7 @@ required-imports = [ "from __future__ import annotations" ]
 [tool.ruff.lint.flake8-type-checking]
 exempt-modules = [  ]
 strict = true
+
+[tool.hatch.envs.hatch-test]
+default-args = [  ]
+extra-dependencies = [ "pyside6" ]
