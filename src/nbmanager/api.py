@@ -11,33 +11,51 @@ from jupyter_server import serverapp
 from psutil import pid_exists
 
 
-class NbSession(TypedDict):
-    id: str
+class JupyerKernel(TypedDict):
+    id: str  # uuid
+    name: str
+    last_activity: str  # ISO 8601 datetime
+    execution_state: str  # idle, busy
+    connections: int
 
 
-class NbServerInfo(TypedDict):
-    base_url: str  # '/'
+class JupyterNotebook(TypedDict):
+    path: str  # file path relative to root?
+    name: str  # file name?
+
+
+class JupyterSession(TypedDict):
+    id: str  # uuid
+    path: str  # file path relative to root?
+    name: str  # file name?
+    type: str  # 'notebook'
+    kernel: JupyerKernel
+    notebook: JupyterNotebook
+
+
+class JupyterServer(TypedDict):
+    base_url: str  # e.g. '/'
     hostname: str
     password: bool
     pid: int
     port: int
     root_dir: str
     secure: bool
-    sock: str  # ''
-    token: str  # md5 hash
+    sock: str  # e.g. ''
+    token: str  # md5 hash?
     url: str
-    version: str  # '2.15.0'
+    version: str  # e.g. '2.15.0'
 
 
-class NbServer:
+class Server:
     pid: int
     port: int
     url: str
     root_dir: str
     token: str
-    last_sessions: list[NbSession]
+    last_sessions: list[JupyterSession]
 
-    def __init__(self, info: NbServerInfo) -> None:
+    def __init__(self, info: JupyterServer) -> None:
         self.pid = info["pid"]
         self.port = info["port"]
         self.url = info["url"]
@@ -73,7 +91,7 @@ class NbServer:
         except requests.ConnectionError:
             return False
 
-    def sessions(self) -> list[NbSession]:
+    def sessions(self) -> list[JupyterSession]:
         params = {}
         if self.token:
             params["token"] = self.token
@@ -89,7 +107,7 @@ class NbServer:
 
     def sessions_new_and_stopped(
         self,
-    ) -> tuple[list[NbSession], list[NbSession], list[NbSession]]:
+    ) -> tuple[list[JupyterSession], list[JupyterSession], list[JupyterSession]]:
         last_by_sid = {s["id"]: s for s in self.last_sessions}
         new_sessions, kept_sessions = [], []
         for curr_sess in self.sessions():
@@ -119,7 +137,7 @@ class NbServer:
         r.raise_for_status()
 
 
-def launch_server(directory: os.PathLike, **kwargs):
+def launch_server(directory: os.PathLike, **kwargs) -> None:
     import subprocess
 
     cmd = [sys.executable, "-m", "jupyterlab", directory, "--no-browser"]

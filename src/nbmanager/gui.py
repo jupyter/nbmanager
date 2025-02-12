@@ -34,7 +34,7 @@ class ActionItem(QtGui.QStandardItem):
 
 
 class ServerItem(QtGui.QStandardItem):
-    server: api.NbServer
+    server: api.Server
 
     def __init__(self, server, icon=None) -> None:
         super().__init__()
@@ -44,7 +44,7 @@ class ServerItem(QtGui.QStandardItem):
 
 
 class SessionItem(ServerItem):
-    def __init__(self, session: api.NbSession, server: api.NbServer) -> None:
+    def __init__(self, session: api.JupyterSession, server: api.Server) -> None:
         super().__init__(server, Icon.Session.icon)
         self.session = session
 
@@ -130,7 +130,7 @@ class ServerWaiterThread(QtCore.QThread):
 
     finished: ClassVar[QtCore.Signal] = QtCore.Signal()
 
-    def __init__(self, server: api.NbServer, parent: QtCore.QObject = None) -> None:
+    def __init__(self, server: api.Server, parent: QtCore.QObject = None) -> None:
         super().__init__(parent)
         self.server = server
         self.registry.add(self)
@@ -157,7 +157,7 @@ class Main(QtWidgets.QMainWindow):
 
     servers_by_pid: dict[int, ServerItem]
     sessions_by_sid: dict[str, SessionItem]
-    current_servers: list[api.NbServer]
+    current_servers: list[api.Server]
 
     processes_model: QtGui.QStandardItemModel
     processes_root: ActionItem
@@ -198,7 +198,7 @@ class Main(QtWidgets.QMainWindow):
         self.ui.tree.expand(root.index())
         return root
 
-    def add_server(self, server: api.NbServer) -> None:
+    def add_server(self, server: api.Server) -> None:
         server_item = ServerItem(server)
         self.servers_by_pid[server.pid] = server_item
         self.processes_root.appendRow(server_item)
@@ -211,7 +211,7 @@ class Main(QtWidgets.QMainWindow):
 
         self.ui.tree.expand(server_item.index())
 
-    def add_session(self, session: api.NbSession, parent):
+    def add_session(self, session: api.JupyterSession, parent):
         session_item = SessionItem(session, parent.server)
         self.sessions_by_sid[session["id"]] = session_item
         parent.appendRow(session_item)
@@ -220,12 +220,12 @@ class Main(QtWidgets.QMainWindow):
         )
 
     def populate_processes(self):
-        self.current_servers = api.NbServer.findall()
+        self.current_servers = api.Server.findall()
         for server in self.current_servers:
             self.add_server(server)
 
     def refresh_processes(self):
-        stopped, started, kept = api.NbServer.find_new_and_stopped(self.current_servers)
+        stopped, started, kept = api.Server.find_new_and_stopped(self.current_servers)
         self.current_servers = kept + started
         for server in stopped:
             row = self.servers_by_pid.pop(server.pid).row()
