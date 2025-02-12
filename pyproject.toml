@@ -1,0 +1,46 @@
+[build-system]
+requires = ['hatchling', 'qtico', 'py2app; sys_platform == "darwin"']
+build-backend = 'hatchling.build'
+
+#from uic2 import compile_all
+#compile_all(True)
+
+
+[project]
+name = 'nbmanager'
+version = '0.1'
+description = 'View and stop running Jupyter notebooks and servers'
+authors = [{ name = 'Thomas Kluyver', email = 'thomas@kluyver.me.uk' }]
+maintainers = [{ name = 'Philipp A.', email = 'flying-sheep@web.de' }]
+urls.Source = 'https://github.com/jupyter/nbmanager'
+requires-python = ">=3.10"
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Framework :: Jupyter',
+    'License :: OSI Approved :: BSD License',
+]
+dependencies = ['qtpy', 'jupyterlab', 'requests', 'psutil', 'qtico']
+
+# app = ['nbmanager']
+# [options.py2app]
+# argv_emulation = true
+# packages = ['nbmanager']
+# alias = true
+# iconfile = 'nbmanager.icns'
+
+[tool.ruff]
+lint.select = ["E", "F", "W", "I", "TC", "UP", "PYI"]
+[tool.ruff.lint.isort]
+known-first-party = [ "scanpy", "testing.scanpy" ]
+required-imports = [ "from __future__ import annotations" ]
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = [  ]
+strict = true
+
+[tool.hatch.envs.hatch-test]
+default-args = [  ]
+extra-dependencies = [ "pyside6" ]
