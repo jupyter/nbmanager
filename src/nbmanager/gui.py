@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import ClassVar, Self
 
-    from qtpy.QtGui import _QAction as QAction
-
 
 class Icon(Enum):
     NbManager = "jupyter-nbmanager"
@@ -34,7 +32,7 @@ class Icon(Enum):
 
 
 class ActionItem(QtGui.QStandardItem):
-    def __init__(self, action: QAction) -> None:
+    def __init__(self, action: QtGui.QAction) -> None:
         super().__init__()
         self.action = action
         self.setEditable(False)
@@ -58,7 +56,7 @@ class SessionItem(ServerItem):
 
 
 class ActionRow(QtWidgets.QWidget):
-    def __init__(self, action: QAction) -> None:
+    def __init__(self, action: QtGui.QAction) -> None:
         super().__init__()
         button = QtWidgets.QPushButton(action.icon(), action.text())
         button.clicked.connect(action.trigger)
@@ -155,7 +153,7 @@ class Ui(Protocol):
     choose_dir_button: QtWidgets.QPushButton
     launch_button: QtWidgets.QPushButton
 
-    actionRefresh: QAction
+    actionRefresh: QtGui.QAction
 
 
 class Main(QtWidgets.QMainWindow):
